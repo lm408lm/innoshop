@@ -1,0 +1,52 @@
+name: Sync Upstream Repository
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # 每30分钟自动检查一次更新
+  workflow_dispatch:  # 允许手动触发同步
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整的Git历史记录
+
+      - name: Configure Git Identity
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Add Upstream Remote
+        run: |
+          # 添加上游仓库地址（请替换为实际的上游仓库）
+          git remote add upstream https://github.com/innocommerce/innoshop.git
+          # 验证远程仓库是否添加成功
+          git remote -v
+
+      - name: Fetch Upstream Changes
+        run: git fetch upstream
+
+      - name: Merge Upstream Changes
+        run: |
+          # 切换到master分支（根据您的实际情况）
+          git checkout master
+          
+          # 尝试合并上游变更
+          if git merge upstream/master --no-edit; then
+            echo "✅ 合并成功：无冲突"
+          else
+            echo "⚠️ 检测到合并冲突，使用上游版本覆盖"
+            git merge --abort
+            git reset --hard upstream/master
+            echo "✅ 已强制使用上游版本"
+          fi
+
+      - name: Push Changes to Fork
+        run: |
+          # 推送到您的Fork仓库的master分支
+          git push origin master --force-with-lease
+          echo "✅ 变更已推送到Fork仓库"
