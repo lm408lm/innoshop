@@ -52,9 +52,12 @@ class CartController extends BaseController
     public function update(Request $request, CartItem $cart): mixed
     {
         try {
+            if ($cart->customer_id != token_customer_id()) {
+                throw new \Exception('Cart item does not belong to the customer');
+            }
             $cartData = CartService::getInstance(token_customer_id())->updateCart($cart, $request->all());
 
-            return json_success(front_trans('common.updated_success'), $cartData);
+            return json_success(common_trans('base.updated_success'), $cartData);
         } catch (\Exception $e) {
             return json_fail($e->getMessage());
         }
@@ -70,7 +73,7 @@ class CartController extends BaseController
             $cartIds  = $request->get('cart_ids');
             $cartData = CartService::getInstance(token_customer_id())->select($cartIds);
 
-            return json_success(front_trans('common.updated_success'), $cartData);
+            return json_success(common_trans('base.updated_success'), $cartData);
         } catch (\Exception $e) {
             return json_fail($e->getMessage());
         }
@@ -86,7 +89,7 @@ class CartController extends BaseController
             $cartIds  = $request->get('cart_ids');
             $cartData = CartService::getInstance(token_customer_id())->unselect($cartIds);
 
-            return json_success(front_trans('common.updated_success'), $cartData);
+            return json_success(common_trans('base.updated_success'), $cartData);
         } catch (\Exception $e) {
             return json_fail($e->getMessage());
         }
@@ -100,7 +103,7 @@ class CartController extends BaseController
         try {
             $cartData = CartService::getInstance(token_customer_id())->selectAll();
 
-            return json_success(front_trans('common.updated_success'), $cartData);
+            return json_success(common_trans('base.updated_success'), $cartData);
         } catch (\Exception $e) {
             return json_fail($e->getMessage());
         }
@@ -114,7 +117,7 @@ class CartController extends BaseController
         try {
             $cartData = CartService::getInstance(token_customer_id())->unselectAll();
 
-            return json_success(front_trans('common.updated_success'), $cartData);
+            return json_success(common_trans('base.updated_success'), $cartData);
         } catch (\Exception $e) {
             return json_fail($e->getMessage());
         }
@@ -132,7 +135,7 @@ class CartController extends BaseController
             }
             $cartData = CartService::getInstance(token_customer_id())->delete($cart);
 
-            return json_success(front_trans('common.deleted_success'), $cartData);
+            return json_success(common_trans('base.deleted_success'), $cartData);
         } catch (\Exception $e) {
             return json_fail($e->getMessage());
         }
